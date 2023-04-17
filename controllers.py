@@ -1,5 +1,7 @@
 from flask import session, redirect, url_for
 from models import User
+from config import *
+
 
 def register_user(name, email, password):
     # Validar que el correo electrónico no esté registrado previamente
