@@ -1,22 +1,30 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import controllers
 
 app = Flask(__name__)
 
 
-@app.route("/login", methods=['POST'])
+@app.route("/login", methods=['GET', 'POST'])
 def login():
-    email = request.form['email']
-    password = request.form['password']
+    if (request.method == 'GET'):
+        return render_template('login.html')
 
+    data = request.get_json()
+    email = data['email']
+    password = data['password']
     return jsonify(controllers.login(email, password))
 
 
-@app.route("/register", methods=['POST'])
+@app.route("/register", methods=['GET', 'POST'])
 def register():
-    name = request.form['name']
-    email = request.form['email']
-    password = request.form['password']
+    if (request.method == 'GET'):
+        return render_template('register.html')
+
+    data = request.get_json()
+    name = data['name']
+    email = data['email']
+    password = data['password']
+    print(name, email, password)
     return jsonify(controllers.register(name, email, password))
 
 
