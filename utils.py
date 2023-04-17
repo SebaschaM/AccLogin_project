@@ -1,5 +1,3 @@
-# Aqui van utilidades, como codigo reutilizable
-
 import json
 from bson import json_util
 

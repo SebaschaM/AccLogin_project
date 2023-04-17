@@ -1,39 +1,29 @@
-from flask import session, redirect, url_for
-from models import User
 from config import *
+from bcrypt import checkpw
+import services
 
 
-def register_user(name, email, password):
-    # Validar que el correo electrónico no esté registrado previamente
-    if User.query.filter_by(email=email).first():
-        return False, 'El correo electrónico ya está registrado'
+def register(name, email, password):
+    user = services.getUserByEmail(email)
 
-    # Validar que la contraseña tenga al menos 8 caracteres
-    if len(password) < 8:
-        return False, 'La contraseña debe tener al menos 8 caracteres'
+    if user:
+        return {'message': 'El correo electrónico ya está registrado', 'hasError': True}
 
-    # Crear un nuevo usuario y guardarlo en la base de datos
-    user = User(name=name, email=email, password=password)
-    db.session.add(user)
-    db.session.commit()
-
-    return True, 'Usuario registrado correctamente'
+    services.register({
+        'name': name,
+        'email': email,
+        'password': password
+    })
+    return {'message': 'Usuario registrado correctamente', 'hasError': False}
 
 
-def login_user(email, password):
-    # Buscar al usuario por correo electrónico
-    user = User.query.filter_by(email=email).first()
+def login(email, password):
+    user = services.getUserByEmail(email)
 
-    # Verificar que el usuario existe y que la contraseña es correcta
-    if user and user.check_password(password):
-        # Crear una sesión de usuario
-        session['user_id'] = user.id
-        return True, 'Inicio de sesión exitoso'
+    if not user:
+        return {'message': 'Correo electrónico o contraseña incorrectos', 'hasError': True}
 
-    return False, 'Correo electrónico o contraseña incorrectos'
+    if not checkpw(password.encode("utf-8"), user['password'].encode("utf-8")):
+        return {'message': 'Correo electrónico o contraseña incorrectos', 'hasError': True}
 
-
-def logout_user():
-    # Eliminar la sesión de usuario
-    session.pop('user_id', None)
-    return redirect(url_for('index'))
+    return {'message': 'Bienvenido', 'hasError': False}
